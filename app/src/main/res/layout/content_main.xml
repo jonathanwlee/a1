@@ -47,6 +47,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/thresholdInput"
         android:layout_below="@+id/shakeDetection"
+        android:inputType = "number"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
@@ -83,8 +84,9 @@
         android:layout_height="wrap_content"
         android:text="Find Air Pressure"
         android:id="@+id/barometerButton"
-        android:layout_centerVertical="true"
+        android:layout_below="@+id/barometerText"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+
 
 </RelativeLayout>
