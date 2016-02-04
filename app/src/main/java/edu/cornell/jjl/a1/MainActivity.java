@@ -30,7 +30,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private int threshold;
 
     private SensorManager mSensorManager;
+    private SensorManager mPressureManager;
+
     private Sensor mSensor;
+    private Sensor mPressure;
 
 
     @Override
@@ -45,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onResume() {
         super.onResume();
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
     }
 
     protected void onPause() {
@@ -75,21 +79,27 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     public void onSensorChanged(SensorEvent event){
-        if (event.sensor.getType() != Sensor.TYPE_ACCELEROMETER) {
-            return;
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            float sensorX = event.values[0];
+            float sensorY = event.values[1];
+            float sensorZ = event.values[2];
+            //Log.w("sensorX", Float.toString(sensorX));
+
+            if (start) {
+                updateAccelerometer(sensorX, sensorY, sensorZ);
+            }
+
+            else {
+            }
         }
 
-        float sensorX = event.values[0];
-        float sensorY = event.values[1];
-        float sensorZ = event.values[2];
-        //Log.w("sensorX", Float.toString(sensorX));
-
-        if (start) {
-            updateAccelerometer(sensorX, sensorY, sensorZ);
+        else if (event.sensor.getType() == Sensor.TYPE_PRESSURE) {
+            float millibars_of_pressure = event.values[0];
+            barometerText.setText("Air Pressure: " + Float.toString(millibars_of_pressure));
+            mPressureManager.unregisterListener(this);
         }
 
-        else {
-        }
+
     }
 
     @Override
@@ -106,10 +116,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         shakeDetection = (TextView) findViewById(R.id.shakeDetection);
         accelerationValues = (TextView) findViewById(R.id.accelerationValues);
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mPressureManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mPressure = mPressureManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
+
         startButton = (Button) findViewById(R.id.startButton);
         stopButton = (Button) findViewById(R.id.stopButton);
         thresholdInput = (EditText) findViewById(R.id.thresholdInput);
+        barometerButton = (Button) findViewById(R.id.barometerButton);
+        barometerText = (TextView) findViewById(R.id.barometerText);
 
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -126,11 +142,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 start = false;
             }
         });
+
+        barometerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPressureManager.registerListener(MainActivity.this, mPressure, SensorManager.SENSOR_DELAY_NORMAL);
+            }
+        });
+
+
     }
 
     public void shakeAlgorithm(double ax, double ay, double az,double threshold) {
         Double x = Math.sqrt(Math.pow(ax,2) + Math.pow(ay,2) + Math.pow(az,2));
-        Log.w("MATH: ",x.toString());
+       // Log.w("MATH: ",x.toString());
         if (Math.sqrt(Math.pow(ax,2) + Math.pow(ay,2) + Math.pow(az,2)) < threshold) {
             shakeDetection.setText("no shake");
         }
